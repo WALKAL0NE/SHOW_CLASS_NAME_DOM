@@ -126,6 +126,14 @@ export class ClassExtractor {
         lines.push(`.${blockName}`);
       }
 
+      // ブロック自身のモディファイアを出力
+      const blockInfo = classList.find(c => c.fullName === blockName);
+      if (blockInfo && blockInfo.modifiers.length > 0) {
+        for (const modifier of blockInfo.modifiers) {
+          lines.push(`\t&${modifier}`);
+        }
+      }
+
       // 階層構造を構築してから出力
       this.outputClassHierarchy(blockName, classList, lines);
     }
