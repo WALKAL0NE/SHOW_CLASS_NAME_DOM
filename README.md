@@ -1,6 +1,6 @@
 # SASS Class Extractor
 
-HTML/Liquid/AstroファイルからクラスをBEM構造で抽出し、SASS/SCSSに貼り付けられる形式で出力するVSCode拡張機能です。
+HTML/Liquid/Astro/PHP/VueファイルからクラスをBEM構造で抽出し、SASS/SCSSに貼り付けられる形式で出力するVSCode拡張機能です。
 
 ## 概要
 
@@ -8,7 +8,7 @@ HTML/Liquid/AstroファイルからクラスをBEM構造で抽出し、SASS/SCSS
 
 ## 主な機能
 
-- ✅ **HTML、Liquid、Astroファイルに対応**
+- ✅ **HTML、Liquid、Astro、PHP、Vueファイルに対応**
 - ✅ **BEM記法の自動認識**（Block__Element--Modifier）
 - ✅ **HTMLタグ名の自動付加**（例: `header.base-header`）
 - ✅ **HTML出現順の保持**
@@ -83,7 +83,9 @@ header.base-header
 - HTML (`.html`)
 - Liquid (`.liquid`)
 - Astro (`.astro`)
-- その他のHTMLテンプレート
+- PHP (`.php`)
+- Vue (`.vue`)
+- その他のHTMLベースのテンプレート
 
 ## 技術仕様
 
@@ -92,30 +94,95 @@ header.base-header
 - **BEM解析**: `__`（エレメント）と`--`（モディファイア）を自動認識
 - **パーサー**: node-html-parser
 
+## インストール方法
+
+### 方法1: VSIXファイルから直接インストール
+
+1. 最新の `.vsix` ファイルをダウンロードまたはビルド
+2. VSCodeを開く
+3. `Cmd+Shift+P` (macOS) または `Ctrl+Shift+P` (Windows/Linux)
+4. "Extensions: Install from VSIX..." を入力・選択
+5. ダウンロードした `.vsix` ファイルを選択
+6. VSCodeをリロード（必要に応じて）
+
+### 方法2: ソースからビルドしてインストール
+
+```bash
+# 1. リポジトリをクローン
+git clone <repository-url>
+cd SHOW_CLASS_NAME_DOM
+
+# 2. 依存関係をインストール
+bun install
+
+# 3. VSIXファイルをビルド
+bunx vsce package
+
+# 4. 生成された sass-class-extractor-0.0.1.vsix をVSCodeにインストール
+```
+
+その後、VSCodeで:
+1. `Cmd+Shift+P` → "Extensions: Install from VSIX..."
+2. `sass-class-extractor-0.0.1.vsix` を選択
+
 ## 開発
 
 ### 環境構築
 
 ```bash
+# 依存関係のインストール
 bun install
 ```
 
-### ビルド
+### 開発サイクル
 
 ```bash
+# TypeScriptをコンパイル
 bun run compile
+
+# ファイル変更を監視（開発時）
+bun run watch
 ```
 
-### パッケージング
+### デバッグ実行
+
+1. VSCodeでこのプロジェクトフォルダを開く
+2. `F5` キーを押す（またはデバッグビューから "Run Extension" を選択）
+3. 新しいVSCodeウィンドウが開き、拡張機能が有効になります
+4. 開いたウィンドウでHTMLファイルを開いてテスト
+
+### パッケージングの詳細
 
 ```bash
+# VSIXファイルを生成（配布用）
 bunx vsce package
+
+# バージョンを指定してパッケージング
+bunx vsce package --version 0.0.2
+
+# プレリリース版としてパッケージング
+bunx vsce package --pre-release
 ```
 
-### インストール
+生成されたファイル: `sass-class-extractor-0.0.1.vsix`
 
-1. VSCodeで `Cmd+Shift+P` → "Extensions: Install from VSIX..."
-2. 生成された `.vsix` ファイルを選択
+### アンインストール
+
+VSCodeの拡張機能ビューから "SASS Class Extractor" を右クリック → "Uninstall"
+
+## トラブルシューティング
+
+### 拡張機能が動作しない場合
+
+1. VSCodeを完全に再起動
+2. 拡張機能を再インストール
+3. 開発者ツール（`Cmd+Option+I`）でエラーを確認
+
+### 古いバージョンがインストールされている場合
+
+1. 古いバージョンをアンインストール
+2. VSCodeを再起動
+3. 新しいバージョンをインストール
 
 ## ライセンス
 

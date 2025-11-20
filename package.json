@@ -1,7 +1,7 @@
 {
   "name": "sass-class-extractor",
   "displayName": "SASS Class Extractor",
-  "description": "Extract class structure from HTML/Liquid/Astro files and convert to SASS format",
+  "description": "Extract class structure from HTML/Liquid/Astro/PHP/Vue files and convert to SASS format",
   "version": "0.0.1",
   "engines": {
     "vscode": "^1.80.0"
@@ -12,7 +12,9 @@
   "activationEvents": [
     "onLanguage:html",
     "onLanguage:liquid",
-    "onLanguage:astro"
+    "onLanguage:astro",
+    "onLanguage:php",
+    "onLanguage:vue"
   ],
   "main": "./out/extension.js",
   "contributes": {
