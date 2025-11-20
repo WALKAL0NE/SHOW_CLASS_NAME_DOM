@@ -1,0 +1,30 @@
+<header class="base-header">
+  <a href="/" class="base-header__logo">
+    {% render 'parts-logo' %}
+  </a>
+  <nav class="base-header__menu">
+    <a href="/" class="base-header__menu__item">Models</a>
+    <a href="/" class="base-header__menu__item">Products</a>
+    <a href="/" class="base-header__menu__item">Concept</a>
+    <a href="/" class="base-header__menu__item">Shoplist</a>
+    <a href="/" class="base-header__menu__item">Contact</a>
+  </nav>
+  <nav class="base-header__nav">
+    <a href="/" class="base-header__nav__item base-header__nav__item--cart">
+      <span>Cart</span>
+    </a>
+    <a href="/" class="base-header__nav__item base-header__nav__item--account">
+      <span>{% if customer %}Account{% else %}Login{% endif %}</span>
+    </a>
+  </nav>
+  <nav class="base-header__lang">
+    <span>JP</span>
+    <span>/</span>
+    <span>EN</span>
+  </nav>
+  <button class="base-header__burger">
+    <div class="base-header__burger__bar"></div>
+    <div class="base-header__burger__bar"></div>
+    <div class="base-header__burger__bar"></div>
+  </button>
+</header>
