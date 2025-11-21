@@ -14,7 +14,8 @@ HTML/Liquid/Astro/PHP/VueファイルからクラスをBEM構造で抽出し、S
 - ✅ **HTML出現順の保持**
 - ✅ **階層構造の維持**（親子関係を保持）
 - ✅ **モディファイアの正しい配置**
-- ✅ **タブインデント**（SASSスタイル）
+- ✅ **SASS/SCSS両方の構文に対応**（設定で切り替え可能）
+- ✅ **タブインデント**
 - ✅ **クリップボードに自動コピー**
 
 ## 使い方
@@ -39,6 +40,28 @@ VSCodeの設定で独自のショートカットを割り当てると便利で�
 2. "sass-class-extractor.extractToClipboard" を検索
 3. 任意のキーバインドを設定（例: `Cmd+Shift+C`）
 
+## 設定
+
+### 出力フォーマットの切り替え
+
+SASS形式（インデント構文）とSCSS形式（CSS-like構文）を切り替えることができます。
+
+#### 設定方法
+
+1. VSCodeの設定を開く（`Cmd+,` または `Ctrl+,`）
+2. "SASS Class Extractor" で検索
+3. "Output Format" から選択:
+   - **SASS** (デフォルト): インデント構文、ブレースなし
+   - **SCSS**: CSS-like構文、ブレースあり
+
+または、`settings.json` に直接記述:
+
+```json
+{
+  "sassClassExtractor.outputFormat": "scss"
+}
+```
+
 ## 実例
 
 ### 入力 (HTML/Liquid)
@@ -59,7 +82,7 @@ VSCodeの設定で独自のショートカットを割り当てると便利で�
 </header>
 ```
 
-### 出力 (SASS)
+### 出力 (SASS形式)
 
 ```sass
 header.base-header
@@ -69,6 +92,24 @@ header.base-header
 	.base-header__nav__item
 	.base-header__contact
 ```
+
+### 出力 (SCSS形式)
+
+```scss
+header.base-header{
+	.base-header__home {
+	}
+	.base-header__nav {
+		&--mobile {}
+	}
+	.base-header__nav__item {
+	}
+	.base-header__contact {
+	}
+}
+```
+
+**注意**: SCSS形式ではフラット構造で出力されます（階層のネストなし）。
 
 ### 特徴的な動作
 
@@ -89,7 +130,10 @@ header.base-header
 
 ## 技術仕様
 
-- **インデント**: タブ文字（1タブ = エレメント、2タブ = モディファイア）
+- **出力フォーマット**:
+  - **SASS**: インデント構文、ブレースなし
+  - **SCSS**: CSS-like構文、ブレースあり
+- **インデント**: タブ文字（階層ごとに1タブ追加）
 - **クラス名抽出**: DOMツリーを走査して出現順を保持
 - **BEM解析**: `__`（エレメント）と`--`（モディファイア）を自動認識
 - **パーサー**: node-html-parser

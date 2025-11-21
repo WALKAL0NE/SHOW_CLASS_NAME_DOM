@@ -3,7 +3,8 @@
     "allow": [
       "Bash(bun install:*)",
       "Bash(bunx vsce:*)",
-      "Bash(bun:*)"
+      "Bash(bun:*)",
+      "Bash(node test-output.js:*)"
     ],
     "deny": [],
     "ask": []

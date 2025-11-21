@@ -32,6 +32,21 @@
           "group": "navigation"
         }
       ]
+    },
+    "configuration": {
+      "title": "SASS Class Extractor",
+      "properties": {
+        "sassClassExtractor.outputFormat": {
+          "type": "string",
+          "default": "sass",
+          "enum": ["sass", "scss"],
+          "enumDescriptions": [
+            "SASS syntax (indented, no braces)",
+            "SCSS syntax (CSS-like, with braces)"
+          ],
+          "description": "Choose output format: SASS or SCSS syntax"
+        }
+      }
     }
   },
   "scripts": {

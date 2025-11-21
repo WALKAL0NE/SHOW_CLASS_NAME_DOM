@@ -11,7 +11,7 @@ export class ClassExtractor {
   /**
    * HTMLコードからクラス名を抽出してSASS構造に変換
    */
-  public extractToSass(html: string): string {
+  public extractToSass(html: string, format: 'sass' | 'scss' = 'sass'): string {
     const root = parse(html, {
       comment: false,
       blockTextElements: {
@@ -26,7 +26,7 @@ export class ClassExtractor {
     const classToTag = new Map<string, string>();
     this.collectClasses(root, allClasses, classToTag);
 
-    return this.convertToSass(allClasses, classToTag);
+    return this.convertToSass(allClasses, classToTag, format);
   }
 
   /**
@@ -65,7 +65,7 @@ export class ClassExtractor {
   /**
    * クラス名の配列をSASS記法に変換（出現順を保持）
    */
-  private convertToSass(classes: string[], classToTag: Map<string, string>): string {
+  private convertToSass(classes: string[], classToTag: Map<string, string>, format: 'sass' | 'scss' = 'sass'): string {
     // ブロック名ごとにクラスをグループ化（出現順を保持）
     const blockMap = new Map<string, ClassInfo[]>();
 
@@ -113,29 +113,46 @@ export class ClassExtractor {
       }
     }
 
-    // SASS形式に変換
+    // SASS/SCSS形式に変換
     const lines: string[] = [];
 
     // ブロックは出現順のまま（Mapは挿入順を保持）
     for (const [blockName, classList] of blockMap.entries()) {
       // ブロック名を出力（タグ名があれば含める）
       const tagName = classToTag.get(blockName);
-      if (tagName) {
-        lines.push(`${tagName}.${blockName}`);
+      if (format === 'sass') {
+        if (tagName) {
+          lines.push(`${tagName}.${blockName}`);
+        } else {
+          lines.push(`.${blockName}`);
+        }
       } else {
-        lines.push(`.${blockName}`);
+        // SCSS形式：開き括弧を同じ行に
+        if (tagName) {
+          lines.push(`${tagName}.${blockName}{`);
+        } else {
+          lines.push(`.${blockName}{`);
+        }
       }
 
       // ブロック自身のモディファイアを出力
       const blockInfo = classList.find(c => c.fullName === blockName);
       if (blockInfo && blockInfo.modifiers.length > 0) {
         for (const modifier of blockInfo.modifiers) {
-          lines.push(`\t&${modifier}`);
+          if (format === 'sass') {
+            lines.push(`\t&${modifier}`);
+          } else {
+            lines.push(`\t&${modifier} {}`);
+          }
         }
       }
 
       // 階層構造を構築してから出力
-      this.outputClassHierarchy(blockName, classList, lines);
+      this.outputClassHierarchy(blockName, classList, lines, format);
+
+      if (format === 'scss') {
+        lines.push('}');
+      }
     }
 
     return lines.join('\n');
@@ -144,7 +161,7 @@ export class ClassExtractor {
   /**
    * クラスを階層的に出力（出現順を保持）
    */
-  private outputClassHierarchy(blockName: string, classList: ClassInfo[], lines: string[]): void {
+  private outputClassHierarchy(blockName: string, classList: ClassInfo[], lines: string[], format: 'sass' | 'scss' = 'sass', depth: number = 0): void {
     // 直接の子要素のみを取得（深さ1のエレメント）
     const directChildren = classList.filter(c => {
       if (c.fullName === blockName) return false;
@@ -156,25 +173,43 @@ export class ClassExtractor {
     directChildren.sort((a, b) => a.order - b.order);
 
     for (const child of directChildren) {
-      // 子要素を出力
-      lines.push(`\t.${child.fullName}`);
+      if (format === 'sass') {
+        // SASS形式：階層構造を維持
+        const indent = '\t'.repeat(depth + 1);
+        lines.push(`${indent}.${child.fullName}`);
 
-      // モディファイアを出力（子要素の直後に出力）
-      if (child.modifiers.length > 0) {
-        for (const modifier of child.modifiers) {
-          lines.push(`\t\t&${modifier}`);
+        // モディファイアを出力（子要素の直後に出力）
+        if (child.modifiers.length > 0) {
+          for (const modifier of child.modifiers) {
+            lines.push(`${indent}\t&${modifier}`);
+          }
         }
-      }
 
-      // この子要素の子要素を再帰的に出力（モディファイアの後）
-      this.outputChildElements(child.fullName, classList, lines);
+        // この子要素の子要素を再帰的に出力（モディファイアの後）
+        this.outputChildElements(child.fullName, classList, lines, format, depth + 1);
+      } else {
+        // SCSS形式：フラット構造（インデントは1タブのみ）
+        lines.push(`\t.${child.fullName} {`);
+
+        // モディファイアを出力（子要素の直後に出力）
+        if (child.modifiers.length > 0) {
+          for (const modifier of child.modifiers) {
+            lines.push(`\t\t&${modifier} {}`);
+          }
+        }
+
+        lines.push(`\t}`);
+
+        // この子要素の子要素を再帰的に出力（モディファイアの後）
+        this.outputChildElements(child.fullName, classList, lines, format, depth + 1);
+      }
     }
   }
 
   /**
    * 特定の親要素の子要素を再帰的に出力（出現順を保持）
    */
-  private outputChildElements(parentName: string, classList: ClassInfo[], lines: string[]): void {
+  private outputChildElements(parentName: string, classList: ClassInfo[], lines: string[], format: 'sass' | 'scss' = 'sass', depth: number = 0): void {
     // 親要素の直接の子要素を取得
     const children = classList.filter(c => {
       // 親要素の名前で始まり、さらに__が1つだけ追加されている
@@ -187,18 +222,36 @@ export class ClassExtractor {
     children.sort((a, b) => a.order - b.order);
 
     for (const child of children) {
-      // 子要素を出力
-      lines.push(`\t.${child.fullName}`);
+      if (format === 'sass') {
+        // SASS形式：階層構造を維持
+        const indent = '\t'.repeat(depth + 1);
+        lines.push(`${indent}.${child.fullName}`);
 
-      // モディファイアを出力（子要素の直後に出力）
-      if (child.modifiers.length > 0) {
-        for (const modifier of child.modifiers) {
-          lines.push(`\t\t&${modifier}`);
+        // モディファイアを出力（子要素の直後に出力）
+        if (child.modifiers.length > 0) {
+          for (const modifier of child.modifiers) {
+            lines.push(`${indent}\t&${modifier}`);
+          }
         }
-      }
 
-      // この子要素の子要素を再帰的に出力（モディファイアの後）
-      this.outputChildElements(child.fullName, classList, lines);
+        // この子要素の子要素を再帰的に出力（モディファイアの後）
+        this.outputChildElements(child.fullName, classList, lines, format, depth + 1);
+      } else {
+        // SCSS形式：フラット構造（インデントは1タブのみ）
+        lines.push(`\t.${child.fullName} {`);
+
+        // モディファイアを出力（子要素の直後に出力）
+        if (child.modifiers.length > 0) {
+          for (const modifier of child.modifiers) {
+            lines.push(`\t\t&${modifier} {}`);
+          }
+        }
+
+        lines.push(`\t}`);
+
+        // この子要素の子要素を再帰的に出力（モディファイアの後）
+        this.outputChildElements(child.fullName, classList, lines, format, depth + 1);
+      }
     }
   }
 
