@@ -156,8 +156,8 @@ export class ClassExtractor {
         }
       }
 
-      // 階層構造を構築してから出力
-      this.outputClassHierarchy(blockName, classList, lines, format);
+      // すべてのエレメントをフラットに出力
+      this.outputAllElements(blockName, classList, lines, format);
 
       if (format === 'scss') {
         lines.push('}');
@@ -168,96 +168,35 @@ export class ClassExtractor {
   }
 
   /**
-   * クラスを階層的に出力（出現順を保持）
+   * ブロック配下のすべてのエレメントをフラットに出力
    */
-  private outputClassHierarchy(blockName: string, classList: ClassInfo[], lines: string[], format: 'sass' | 'scss' = 'sass', depth: number = 0): void {
-    // 直接の子要素のみを取得（深さ1のエレメント）
-    const directChildren = classList.filter(c => {
-      if (c.fullName === blockName) return false;
-      const parts = c.fullName.split('__');
-      return parts.length === 2; // block__element
-    });
+  private outputAllElements(blockName: string, classList: ClassInfo[], lines: string[], format: 'sass' | 'scss'): void {
+    // ブロック以外のすべてのクラスを取得
+    const elements = classList.filter(c => c.fullName !== blockName);
 
     // 出現順にソート
-    directChildren.sort((a, b) => a.order - b.order);
+    elements.sort((a, b) => a.order - b.order);
 
-    for (const child of directChildren) {
+    for (const element of elements) {
       if (format === 'sass') {
-        // SASS形式：フラット構造（インデントは1レベルのみ）
-        lines.push(`${this.indentChar}.${child.fullName}`);
-
-        // モディファイアを出力（子要素の直後に出力）
-        if (child.modifiers.length > 0) {
-          for (const modifier of child.modifiers) {
-            lines.push(`${this.indentChar}${this.indentChar}&${modifier}`);
-          }
-        }
-
-        // この子要素の子要素を再帰的に出力（モディファイアの後）
-        this.outputChildElements(child.fullName, classList, lines, format, depth + 1);
+        lines.push(`${this.indentChar}.${element.fullName}`);
       } else {
-        // SCSS形式：フラット構造（インデントは1レベルのみ）
-        lines.push(`${this.indentChar}.${child.fullName} {`);
-
-        // モディファイアを出力（子要素の直後に出力）
-        if (child.modifiers.length > 0) {
-          for (const modifier of child.modifiers) {
-            lines.push(`${this.indentChar}${this.indentChar}&${modifier} {}`);
-          }
-        }
-
-        lines.push(`${this.indentChar}}`);
-
-        // この子要素の子要素を再帰的に出力（モディファイアの後）
-        this.outputChildElements(child.fullName, classList, lines, format, depth + 1);
+        lines.push(`${this.indentChar}.${element.fullName} {`);
       }
-    }
-  }
 
-  /**
-   * 特定の親要素の子要素を再帰的に出力（出現順を保持）
-   */
-  private outputChildElements(parentName: string, classList: ClassInfo[], lines: string[], format: 'sass' | 'scss' = 'sass', depth: number = 0): void {
-    // 親要素の直接の子要素を取得
-    const children = classList.filter(c => {
-      // 親要素の名前で始まり、さらに__が1つだけ追加されている
-      if (!c.fullName.startsWith(parentName + '__')) return false;
-      const remaining = c.fullName.substring(parentName.length + 2);
-      return !remaining.includes('__'); // 孫要素以降は除外
-    });
-
-    // 出現順にソート
-    children.sort((a, b) => a.order - b.order);
-
-    for (const child of children) {
-      if (format === 'sass') {
-        // SASS形式：フラット構造（インデントは1レベルのみ）
-        lines.push(`${this.indentChar}.${child.fullName}`);
-
-        // モディファイアを出力（子要素の直後に出力）
-        if (child.modifiers.length > 0) {
-          for (const modifier of child.modifiers) {
+      // モディファイアを出力
+      if (element.modifiers.length > 0) {
+        for (const modifier of element.modifiers) {
+          if (format === 'sass') {
             lines.push(`${this.indentChar}${this.indentChar}&${modifier}`);
-          }
-        }
-
-        // この子要素の子要素を再帰的に出力（モディファイアの後）
-        this.outputChildElements(child.fullName, classList, lines, format, depth + 1);
-      } else {
-        // SCSS形式：フラット構造（インデントは1レベルのみ）
-        lines.push(`${this.indentChar}.${child.fullName} {`);
-
-        // モディファイアを出力（子要素の直後に出力）
-        if (child.modifiers.length > 0) {
-          for (const modifier of child.modifiers) {
+          } else {
             lines.push(`${this.indentChar}${this.indentChar}&${modifier} {}`);
           }
         }
+      }
 
+      if (format === 'scss') {
         lines.push(`${this.indentChar}}`);
-
-        // この子要素の子要素を再帰的に出力（モディファイアの後）
-        this.outputChildElements(child.fullName, classList, lines, format, depth + 1);
       }
     }
   }

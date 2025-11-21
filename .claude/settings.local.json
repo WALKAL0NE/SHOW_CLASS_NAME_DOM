@@ -10,7 +10,8 @@
       "Bash(node test-indent.js:*)",
       "Bash(node test-comparison.js:*)",
       "Bash(node test-sass-output.js:*)",
-      "Bash(node test-flat-sass.js:*)"
+      "Bash(node test-flat-sass.js:*)",
+      "Bash(node:*)"
     ],
     "deny": [],
     "ask": []
