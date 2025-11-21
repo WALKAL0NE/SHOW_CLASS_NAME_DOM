@@ -45,6 +45,23 @@
             "SCSS syntax (CSS-like, with braces)"
           ],
           "description": "Choose output format: SASS or SCSS syntax"
+        },
+        "sassClassExtractor.indentType": {
+          "type": "string",
+          "default": "tab",
+          "enum": ["tab", "space"],
+          "enumDescriptions": [
+            "Use tab character for indentation",
+            "Use spaces for indentation"
+          ],
+          "description": "Choose indentation type: tab or spaces"
+        },
+        "sassClassExtractor.indentSize": {
+          "type": "number",
+          "default": 2,
+          "minimum": 1,
+          "maximum": 8,
+          "description": "Number of spaces per indentation level (only applicable when indentType is 'space')"
         }
       }
     }

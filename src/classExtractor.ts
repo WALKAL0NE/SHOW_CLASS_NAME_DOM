@@ -8,6 +8,15 @@ interface ClassInfo {
 }
 
 export class ClassExtractor {
+  private indentChar: string = '\t';
+
+  /**
+   * インデント文字を設定
+   */
+  public setIndent(type: 'tab' | 'space', size: number = 2): void {
+    this.indentChar = type === 'tab' ? '\t' : ' '.repeat(size);
+  }
+
   /**
    * HTMLコードからクラス名を抽出してSASS構造に変換
    */
@@ -140,9 +149,9 @@ export class ClassExtractor {
       if (blockInfo && blockInfo.modifiers.length > 0) {
         for (const modifier of blockInfo.modifiers) {
           if (format === 'sass') {
-            lines.push(`\t&${modifier}`);
+            lines.push(`${this.indentChar}&${modifier}`);
           } else {
-            lines.push(`\t&${modifier} {}`);
+            lines.push(`${this.indentChar}&${modifier} {}`);
           }
         }
       }
@@ -174,31 +183,30 @@ export class ClassExtractor {
 
     for (const child of directChildren) {
       if (format === 'sass') {
-        // SASS形式：階層構造を維持
-        const indent = '\t'.repeat(depth + 1);
-        lines.push(`${indent}.${child.fullName}`);
+        // SASS形式：フラット構造（インデントは1レベルのみ）
+        lines.push(`${this.indentChar}.${child.fullName}`);
 
         // モディファイアを出力（子要素の直後に出力）
         if (child.modifiers.length > 0) {
           for (const modifier of child.modifiers) {
-            lines.push(`${indent}\t&${modifier}`);
+            lines.push(`${this.indentChar}${this.indentChar}&${modifier}`);
           }
         }
 
         // この子要素の子要素を再帰的に出力（モディファイアの後）
         this.outputChildElements(child.fullName, classList, lines, format, depth + 1);
       } else {
-        // SCSS形式：フラット構造（インデントは1タブのみ）
-        lines.push(`\t.${child.fullName} {`);
+        // SCSS形式：フラット構造（インデントは1レベルのみ）
+        lines.push(`${this.indentChar}.${child.fullName} {`);
 
         // モディファイアを出力（子要素の直後に出力）
         if (child.modifiers.length > 0) {
           for (const modifier of child.modifiers) {
-            lines.push(`\t\t&${modifier} {}`);
+            lines.push(`${this.indentChar}${this.indentChar}&${modifier} {}`);
           }
         }
 
-        lines.push(`\t}`);
+        lines.push(`${this.indentChar}}`);
 
         // この子要素の子要素を再帰的に出力（モディファイアの後）
         this.outputChildElements(child.fullName, classList, lines, format, depth + 1);
@@ -223,31 +231,30 @@ export class ClassExtractor {
 
     for (const child of children) {
       if (format === 'sass') {
-        // SASS形式：階層構造を維持
-        const indent = '\t'.repeat(depth + 1);
-        lines.push(`${indent}.${child.fullName}`);
+        // SASS形式：フラット構造（インデントは1レベルのみ）
+        lines.push(`${this.indentChar}.${child.fullName}`);
 
         // モディファイアを出力（子要素の直後に出力）
         if (child.modifiers.length > 0) {
           for (const modifier of child.modifiers) {
-            lines.push(`${indent}\t&${modifier}`);
+            lines.push(`${this.indentChar}${this.indentChar}&${modifier}`);
           }
         }
 
         // この子要素の子要素を再帰的に出力（モディファイアの後）
         this.outputChildElements(child.fullName, classList, lines, format, depth + 1);
       } else {
-        // SCSS形式：フラット構造（インデントは1タブのみ）
-        lines.push(`\t.${child.fullName} {`);
+        // SCSS形式：フラット構造（インデントは1レベルのみ）
+        lines.push(`${this.indentChar}.${child.fullName} {`);
 
         // モディファイアを出力（子要素の直後に出力）
         if (child.modifiers.length > 0) {
           for (const modifier of child.modifiers) {
-            lines.push(`\t\t&${modifier} {}`);
+            lines.push(`${this.indentChar}${this.indentChar}&${modifier} {}`);
           }
         }
 
-        lines.push(`\t}`);
+        lines.push(`${this.indentChar}}`);
 
         // この子要素の子要素を再帰的に出力（モディファイアの後）
         this.outputChildElements(child.fullName, classList, lines, format, depth + 1);

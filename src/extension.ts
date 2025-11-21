@@ -29,9 +29,14 @@ export function activate(context: vscode.ExtensionContext) {
       }
 
       try {
-        // 設定から出力フォーマットを取得
+        // 設定から出力フォーマットとインデント設定を取得
         const config = vscode.workspace.getConfiguration('sassClassExtractor');
         const outputFormat = config.get<'sass' | 'scss'>('outputFormat', 'sass');
+        const indentType = config.get<'tab' | 'space'>('indentType', 'tab');
+        const indentSize = config.get<number>('indentSize', 2);
+
+        // インデント設定を適用
+        extractor.setIndent(indentType, indentSize);
 
         // SASS/SCSS構造を抽出
         const sassStructure = extractor.extractToSass(text, outputFormat);
